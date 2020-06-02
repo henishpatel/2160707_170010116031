@@ -1,0 +1,99 @@
+*FilterOne.java*
+
+package com.henish;
+
+import java.io.IOException;
+import java.io.PrintWriter;
+import javax.servlet.*;
+import javax.servlet.Filter;
+
+public class FilterOne implements Filter{
+    @Override
+    public void init(FilterConfig config){
+        
+    }
+
+    @Override
+    public void doFilter(ServletRequest req,ServletResponse res, FilterChain chain) throws IOException, ServletException{
+        PrintWriter out = res.getWriter();
+        StringBuilder reverse = new StringBuilder();
+        reverse.append(req.getParameter("er_no"));
+        reverse = reverse.reverse();
+        req.setAttribute("rev_er_no", reverse);
+        chain.doFilter(req, res);
+        out.println("Your reverse Enrollment No.: "+reverse);
+    }
+    @Override
+    public void destroy(){
+        
+    }
+}
+
+
+*FilterServlet.java*
+
+package com.henish;
+
+import java.io.IOException;
+import java.io.PrintWriter;
+import javax.servlet.http.*;
+
+public class FilterServlet extends HttpServlet{
+	private static final long serialVersionUID = 1L;
+	
+	@Override
+    public void service(HttpServletRequest req, HttpServletResponse res) throws IOException {
+		HttpSession ss = req.getSession();
+		String userAgent = req.getHeader("user-agent");
+		if (userAgent.indexOf("MSIE") > -1) {
+			ss.setAttribute("Er", "Your browser is Microsoft Internet Explorer");
+		}
+		res.setContentType("text/html");
+        PrintWriter out = res.getWriter();
+        String er_no = req.getParameter("er_no");
+        out.println("Welcome "+er_no);
+    }
+}
+
+
+
+*web.xml*
+
+<?xml version="1.0" encoding="UTF-8"?>
+<web-app xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://xmlns.jcp.org/xml/ns/javaee" xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/javaee http://xmlns.jcp.org/xml/ns/javaee/web-app_4_0.xsd" id="WebApp_ID" version="4.0">
+  <servlet>
+        <servlet-name>FilterServlet</servlet-name>
+        <servlet-class>com.henish.FilterServlet</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>FilterServlet</servlet-name>
+        <url-pattern>/Filter</url-pattern>
+    </servlet-mapping>
+    <filter>
+        <filter-name>FilterOne</filter-name>
+        <filter-class>com.henish.FilterOne</filter-class>
+    </filter>
+    <filter-mapping>
+        <filter-name>FilterOne</filter-name>
+        <servlet-name>FilterServlet</servlet-name>
+        <url-pattern>/Filter1</url-pattern>
+    </filter-mapping>
+</web-app>
+
+
+
+*index.html*
+
+<html>
+    <head>
+        <title>Filter</title>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    </head>
+    <body>
+        <form action="Filter">
+            <p>Enrollment_No.: <input type="text" name="er_no"></p>
+            <p><input type="submit" value="submit"></p>
+        </form>
+    </body>
+</html>
